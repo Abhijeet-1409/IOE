@@ -1,0 +1,55 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.row-Container{
+    justify-content: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+/* Define the CSS styles for the cards */
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 10px;
+    width: 250px;
+    height: 250px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+}
+
+img {
+    max-width: 100%; /* Set the maximum width to 100% of the parent element */
+    height: auto; /* Maintain aspect ratio */
+}
+
+
+/* Style the headings within the cards */
+.card h2 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* Style the graph section within the cards */
+.card .graph {
+    background-color: #f2f2f2;
+    padding: 10px;
+}

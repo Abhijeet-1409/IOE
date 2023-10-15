@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit no">
+    <title>Security Monitoring</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="/static/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/static/assets/vendors/css/vendor.bundle.base.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/static/assets/css/style.css">
+    <style>
+      /* Custom CSS for the switches */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      /* Create a toggle switch using a div element */
+      .switch div {
+        width: 40px;
+        height: 20px;
+        background: #ccc;
+        border-radius: 15px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: 0.4s;
+      }
+
+      /* Create a rolling circle to represent the on and off state */
+      .switch div::before {
+        content: '';
+        width: 20px;
+        height: 20px;
+        background: #fff;
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: 0.4s;
+      }
+
+      .off {
+        background-color: green;
+      }
+
+      .on {
+          background-color: red;
+      }
+
+      #mbt, #fbt, #gbt {
+          width: 3rem;
+          height: 3rem;
+          border-radius: 1.5rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+
+      #it, #gt, #ft {
+          font-size: 16px;
+      }
+
+      .text {
+          font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+      <div class="text-left navbar-brand-wrapper d-flex align-items-left justify-content-left">
+        <a class="navbar-brand brand-logo min-width-20" href="index.html"><img src="/static/assets/images/lock.svg" alt="logo" /></a>
+      </div>
+    </nav>
+
+    <!-- Labels for Security Monitoring with Switches -->
+    <div class="container-fluid page-body-wrapper">
+      <div class="content-wrapper">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card bg-gradient-warning card-img-holder text-blue">
+              <div class="card-body">
+                <h4 class="font-weight-normal mb-3">Intruder Detected<i class="mdi mdi-alert mdi-24px float-right"></i></h4>
+                <div id="mbt"><h3 id="it"></h3></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card bg-gradient-warning card-img-holder text-blue">
+              <div class="card-body">
+                <h4 class="font-weight-normal mb-3">Gas Leakage <i class="mdi mdi-gas-cylinder mdi-24px float-right"></i></h4>
+                <div id="gbt"><h3 id="gt"></h3></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card bg-gradient-warning card-img-holder text-blue">
+              <div class="card-body">
+                <h4 class="font-weight-normal mb-3">Fire Detection <i class="mdi mdi-fire mdi-24px float-right"></i></h4>
+                <div id="fbt"><h3 id="ft"></h3></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New row with timestamps for Intruder, Gas Leakage, and Fire Detection -->
+        <div class="row mt-4">
+          <div class="col-md-4">
+            <div class="card bg-gradient-info card-img-holder text-blue">
+              <div class="card-body">
+                <h4 class="font-weight-normal mb-3">Intruder Detected <i class="mdi mdi-alert mdi-24px float-right"></i></h4>
+                <p id="intruderTimestamp"></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card bg-gradient-info card-img-holder text-blue">
+              <div class="card-body">
+                <h4 class="font-weight-normal mb-3">Gas Leakage <i class="mdi mdi-gas-cylinder mdi-24px float-right"></i></h4>
+                <p id="gasleakageTimestamp"></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card bg-gradient-info card-img-holder text-blue">
+              <div class="card-body">
+                <h4 class="font-weight-normal mb-3">Fire Detection <i class="mdi mdi-fire mdi-24px float-right"></i></h4>
+                <p id="firedetectionTimestamp"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        function capitalizeObjectKeys(obj) {
+          const capitalizedObj = {};
+
+          for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+              let capitalizedKey;
+              if (key === 'created_at' || key === 'updated_at') capitalizedKey = key;
+              else capitalizedKey = key.toUpperCase();
+              capitalizedObj[capitalizedKey] = obj[key];
+            }
+          }
+
+          return capitalizedObj;
+        }
+
+        // Function to update the state of the button based on the last element of the JSON array
+        async function updateButtonState(data) {
+            if (data.length > 0) {
+                let lastEvent = data[data.length - 1];
+
+                console.log(lastEvent);
+
+                const ok = 'EVERYTHING OK';
+
+                const motionButton = document.getElementById("mbt");
+                const fireButton = document.getElementById("fbt");
+                const gasButton = document.getElementById("gbt");
+
+                const motionText = document.getElementById("it");
+                const gasText = document.getElementById("gt");
+                const fireText = document.getElementById("ft");
+
+              try {
+                if (lastEvent['MOTION'] !== ok || lastEvent['FIRE'] !== ok || lastEvent['GAS'] !== ok) {
+                    const response = await fetch('http://localhost:3333/securities', {
+                      method: 'POST',
+                      credentials: 'include',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        MOTION: lastEvent['MOTION'],
+                        FIRE: lastEvent['FIRE'],
+                        GAS: lastEvent['GAS']
+                      })
+                    });
+
+                    lastEvent = await response.json();
+                    lastEvent = capitalizeObjectKeys(lastEvent);
+                    console.log(lastEvent);
+                }
+
+                // For motion
+                if (lastEvent['MOTION'] !== ok) {
+                    const motionNow = new Date();
+                    motionButton.classList.add("on");
+                    motionText.innerText = "ON";
+                    document.getElementById("intruderTimestamp").innerHTML = `${lastEvent['created_at']}`;
+                }
+                else {
+                    motionButton.classList.add("off");
+                    motionText.innerText = "OFF";
+                    document.getElementById("intruderTimestamp").innerHTML = `Timestamp: NA`;
+                }
+
+                // For gas
+                if (lastEvent['GAS'] !== ok) {
+                    const gasNow = new Date();
+                    gasButton.classList.add("on");
+                    gasText.innerText = "ON";
+                    document.getElementById("gasleakageTimestamp").innerHTML = `Timestamp: ${lastEvent['created_at']}`;
+                }
+                else {
+                    gasButton.classList.add("off");
+                    gasText.innerText = "OFF";
+                    document.getElementById("gasleakageTimestamp").innerHTML = `Timestamp: NA`;
+                }
+
+                // For fire
+                if (lastEvent['FIRE'] !== ok) {
+                    const fireNow = new Date();
+                    fireButton.classList.add("on");
+                    fireText.innerText = "ON";
+                    document.getElementById("firedetectionTimestamp").innerHTML = `Timestamp: ${lastEvent['created_at']}`;
+                }
+                else {
+                    fireButton.classList.add("off");
+                    fireText.innerText = "OFF";
+                    document.getElementById("firedetectionTimestamp").innerHTML = `Timestamp: NA`;
+                }
+              } catch (e) {
+                console.error(e);
+              }
+          }
+        }     
+
+        window.addEventListener('load', function () {
+            fetch('http://localhost:5000/get_data')
+            .then((response) => response.json())
+            .then(async (data) => {
+              await updateButtonState(data);
+            })
+            .catch((error) => {
+                console.error('Error fetching API data:', error);
+            });
+        });
+    </script>
+  </body>
+</html>
